@@ -4,7 +4,6 @@ Proyecto universitario de aplicacion Android para corredores, desarrollado con J
 
 ## Documentacion principal
 
-- Blueprints del proyecto: archivos `Blueprint-*.md` y `Blueprint-*.docx`
 - Modelo de base de datos: `supabase/docs/database-model.md`
 - APIs personalizadas: `supabase/docs/edge-functions-api.md`
 - Reporte de pruebas de APIs: `supabase/docs/api-test-report.md`
@@ -35,7 +34,7 @@ La configuracion de Supabase incluye:
 
 ## Equipo
 
-- ASTRID LIZBETH CASTELLANOS PINEDA
-- EDWIN RENE TORRES HERNANDEZ
-- JOSUE ELIAS DURON MIGUEL
-- MICHELLE ALEJANDRA PERDOMO RAMOS
+- Astrid Lizbeth Castellanos Pineda
+- Edwin Rene Torres Hernandez
+- Josue Elias Duron Miguel
+- Michelle Alejandra Perdomo Ramos
