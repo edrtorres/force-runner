@@ -79,7 +79,12 @@ paths:
       tags:
         - Auth
       summary: Iniciar sesion
-      description: Obtiene `access_token` usando correo y contrasena. Usar `grant_type=password`.
+      description: |
+        Obtiene `access_token` usando correo y contrasena.
+
+        URL completa:
+
+        `https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1/token?grant_type=password`
       operationId: signIn
       servers:
         - url: https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1
