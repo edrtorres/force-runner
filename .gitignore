@@ -1,0 +1,24 @@
+# Local agent and tool state
+.agents/
+.codex/
+
+# Render/QA temporary output
+rendered/
+qa_blueprint_render/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Java/Android build outputs
+.gradle/
+build/
+app/build/
+local.properties
+
+# Secrets and local environment
+.env
+.env.*
+*.keystore
+*.jks
