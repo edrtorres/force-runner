@@ -15,27 +15,6 @@
         display: none;
       }
 
-      .copy-full-url {
-        margin-left: auto;
-        margin-right: 12px;
-        border: 1px solid #94a3b8;
-        border-radius: 4px;
-        background: #ffffff;
-        color: #334155;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 5px 8px;
-      }
-
-      .copy-full-url:hover {
-        background: #f1f5f9;
-      }
-
-      .copy-full-url.copied {
-        border-color: #16a34a;
-        color: #16a34a;
-      }
     </style>
   </head>
   <body>
@@ -55,49 +34,6 @@
           defaultModelsExpandDepth: 1,
         });
 
-        const authBaseUrl = "https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1";
-        const apiBaseUrl = "https://mmhmtcotlirxhspeqhfh.supabase.co/functions/v1/force-runner-api";
-        const authPaths = new Set(["/signup", "/token", "/recover", "/logout"]);
-
-        function fullUrlForPath(path) {
-          const baseUrl = authPaths.has(path) ? authBaseUrl : apiBaseUrl;
-          const query = path === "/token" ? "?grant_type=password" : "";
-          return `${baseUrl}${path}${query}`;
-        }
-
-        function addCopyButtons() {
-          document.querySelectorAll(".opblock-summary").forEach((summary) => {
-            if (summary.querySelector(".copy-full-url")) return;
-
-            const pathElement = summary.querySelector(".opblock-summary-path");
-            const path = pathElement?.getAttribute("data-path") || pathElement?.textContent?.trim();
-            if (!path) return;
-
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "copy-full-url";
-            button.textContent = "Copiar URL";
-            button.addEventListener("click", async (event) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              await navigator.clipboard.writeText(fullUrlForPath(path));
-              button.textContent = "Copiada";
-              button.classList.add("copied");
-
-              window.setTimeout(() => {
-                button.textContent = "Copiar URL";
-                button.classList.remove("copied");
-              }, 1400);
-            });
-
-            summary.insertBefore(button, summary.querySelector(".authorization__btn"));
-          });
-        }
-
-        const observer = new MutationObserver(addCopyButtons);
-        observer.observe(document.getElementById("swagger-ui"), { childList: true, subtree: true });
-        addCopyButtons();
       };
     </script>
   </body>
