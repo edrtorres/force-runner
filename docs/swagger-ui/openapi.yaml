@@ -10,8 +10,6 @@ info:
 servers:
   - url: https://mmhmtcotlirxhspeqhfh.supabase.co/functions/v1/force-runner-api
     description: Supabase Edge Function - Force Runner API
-  - url: https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1
-    description: Supabase Auth API
 tags:
   - name: Auth
     description: Autenticacion gestionada por Supabase Auth

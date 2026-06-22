@@ -23,7 +23,7 @@
     <script>
       window.onload = function () {
         window.ui = SwaggerUIBundle({
-          url: "./openapi.yaml",
+          url: "./openapi.yaml?v=20260621-2",
           dom_id: "#swagger-ui",
           deepLinking: true,
           presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
@@ -31,6 +31,20 @@
           layout: "StandaloneLayout",
           docExpansion: "none",
           defaultModelsExpandDepth: 1,
+          tagsSorter: function (left, right) {
+            const order = [
+              "Auth",
+              "Perfil",
+              "Carrera",
+              "Historial",
+              "Amigos",
+              "Reacciones",
+              "Chat",
+              "Notificaciones",
+              "Coach IA",
+            ];
+            return order.indexOf(left) - order.indexOf(right);
+          },
         });
 
         const authBaseUrl = "https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1";
@@ -53,6 +67,26 @@
 
           return originalWriteText(trimmedText);
         };
+
+        document.addEventListener(
+          "click",
+          function (event) {
+            const copyButton = event.target.closest(".copy-to-clipboard");
+            if (!copyButton) return;
+
+            const operation = copyButton.closest(".opblock");
+            const pathElement = operation?.querySelector(".opblock-summary-path");
+            const path = pathElement?.getAttribute("data-path") || pathElement?.textContent?.trim();
+
+            if (!path || !path.startsWith("/") || path.startsWith("//")) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            originalWriteText(buildFullUrl(path));
+          },
+          true
+        );
       };
     </script>
   </body>
