@@ -3,4 +3,6 @@
     <color name="primary">#52D832</color>
     <color name="primary_dark">#163010</color>
     <color name="background_light">#F7FAF6</color>
+    <color name="text_secondary">#61705D</color>
+    <color name="error">#B3261E</color>
 </resources>

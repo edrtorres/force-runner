@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Force Runner</string>
+    <string name="splash_subtitle">Corre, compite y supera tus limites</string>
+    <string name="login_title">Bienvenido de nuevo</string>
+    <string name="login_subtitle">Inicia sesion para continuar</string>
+    <string name="email_label">Correo electronico</string>
+    <string name="password_label">Contrasena</string>
+    <string name="login_button">Iniciar sesion</string>
+    <string name="login_success">Sesion iniciada</string>
 </resources>
