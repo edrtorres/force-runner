@@ -6,6 +6,10 @@ android {
     namespace 'com.forcerunner'
     compileSdk 35
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'com.forcerunner'
         minSdk 26
@@ -16,6 +20,10 @@ android {
         buildConfigField 'String', 'SUPABASE_BASE_URL', '"https://mmhmtcotlirxhspeqhfh.supabase.co/"'
         buildConfigField 'String', 'FORCE_RUNNER_API_PATH', '"/functions/v1/force-runner-api-v2/"'
         buildConfigField 'String', 'SUPABASE_PUBLISHABLE_KEY', '"sb_publishable_BBbGd3Iz4Qy7MpmdwjntHg_okDftI2O"'
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
