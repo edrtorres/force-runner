@@ -1,18 +1,20 @@
 import type { ActivityRepository, FriendshipRepository, ProfileRepository, RunRepository } from "../../domain/repositories.ts";
 import { NotificationService } from "../services/notification-service.ts";
-import { optionalLimit, requiredNumber } from "../validation.ts";
+import { optionalCoordinate, optionalLimit, positiveNumber } from "../validation.ts";
 
 export class StartRunUseCase {
   constructor(private readonly profiles: ProfileRepository, private readonly friendships: FriendshipRepository, private readonly activities: ActivityRepository, private readonly notifications: NotificationService) {}
 
   async execute(userId: string, input: Record<string, unknown>) {
     const profile = await this.profiles.getById(userId);
+    const latitude = optionalCoordinate(input, "latitude");
+    const longitude = optionalCoordinate(input, "longitude");
     const activity = await this.activities.create({
       user_id: userId,
       type: "started_running",
       title: `${profile.display_name} comenzo a correr`,
       body: "Enviale apoyo y motivacion",
-      metadata: { latitude: input.latitude ?? null, longitude: input.longitude ?? null }
+      metadata: { latitude, longitude }
     });
     const created = await this.notifications.notifyUsers(await this.friendships.getAcceptedFriendIds(userId), userId, "friend_started_running", String(activity.title), String(activity.body), "activities", String(activity.id));
     return { activity, notifications_created: created.length };
@@ -35,8 +37,8 @@ export class FinishRunUseCase {
   constructor(private readonly profiles: ProfileRepository, private readonly friendships: FriendshipRepository, private readonly runs: RunRepository, private readonly activities: ActivityRepository, private readonly notifications: NotificationService) {}
 
   async execute(userId: string, input: Record<string, unknown>) {
-    requiredNumber(input, "duration_seconds");
-    requiredNumber(input, "distance_meters");
+    positiveNumber(input, "duration_seconds");
+    positiveNumber(input, "distance_meters");
     const run = await this.runs.create(userId, input);
     const pointsCreated = await this.runs.addPoints(run.id, input, run.ended_at ?? new Date().toISOString());
     const profile = await this.profiles.getById(userId);
