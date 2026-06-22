@@ -6,6 +6,17 @@ import { enumValue, maxLength, optionalLimit, positiveNumber, requiredString, va
 const reactionTypes = ["fire", "strong", "clap", "heart", "wow", "trophy"] as const;
 const targetTypes = ["run", "activity"] as const;
 const coachInputTypes = ["text", "voice"] as const;
+const notificationTypes = [
+  "friend_started_running",
+  "friend_stopped_running",
+  "friend_finished_run",
+  "ranking_up",
+  "reaction_received",
+  "friend_request_received",
+  "friend_request_accepted",
+  "chat_message_received",
+  "coach_message"
+] as const;
 
 export class SendReactionUseCase {
   constructor(private readonly reactions: ReactionRepository, private readonly runs: RunRepository, private readonly activities: ActivityRepository, private readonly friendships: FriendshipRepository) {}
@@ -70,10 +81,11 @@ export class MessagesUseCase {
 export class NotifyFriendsUseCase {
   constructor(private readonly friendships: FriendshipRepository, private readonly notifications: NotificationService) {}
   async execute(userId: string, input: Record<string, unknown>) {
+    const type = enumValue(requiredString(input, "type"), notificationTypes, "type");
     const created = await this.notifications.notifyUsers(
       await this.friendships.getAcceptedFriendIds(userId),
       userId,
-      maxLength(requiredString(input, "type"), "type", 80),
+      type,
       maxLength(requiredString(input, "title"), "title", 120),
       maxLength(requiredString(input, "body"), "body", 500),
       typeof input.related_table === "string" ? input.related_table : undefined,
