@@ -14,7 +14,6 @@
       .topbar {
         display: none;
       }
-
     </style>
   </head>
   <body>
@@ -34,6 +33,36 @@
           defaultModelsExpandDepth: 1,
         });
 
+        const authBaseUrl = "https://mmhmtcotlirxhspeqhfh.supabase.co/auth/v1";
+        const apiBaseUrl = "https://mmhmtcotlirxhspeqhfh.supabase.co/functions/v1/force-runner-api";
+        const authPaths = new Set(["/signup", "/token", "/recover", "/logout"]);
+
+        function buildFullUrl(path) {
+          const baseUrl = authPaths.has(path) ? authBaseUrl : apiBaseUrl;
+          const query = path === "/token" ? "?grant_type=password" : "";
+          return `${baseUrl}${path}${query}`;
+        }
+
+        document.addEventListener(
+          "click",
+          async function (event) {
+            const clickedElement = event.target;
+            const copyButton = clickedElement.closest?.(".copy-to-clipboard");
+            if (!copyButton) return;
+
+            const operation = copyButton.closest(".opblock");
+            const pathElement = operation?.querySelector(".opblock-summary-path");
+            const path = pathElement?.getAttribute("data-path") || pathElement?.textContent?.trim();
+            if (!path || !path.startsWith("/")) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            await navigator.clipboard.writeText(buildFullUrl(path));
+          },
+          true,
+        );
       };
     </script>
   </body>
