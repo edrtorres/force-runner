@@ -1,5 +1,5 @@
 import { ForbiddenError, NotFoundError } from "../../domain/errors.ts";
-import type { ActivityRepository, ChatRepository, CoachRepository, FriendshipRepository, NotificationRepository, ProfileRepository, ReactionRepository, RunRepository } from "../../domain/repositories.ts";
+import type { ActivityRepository, ChatRepository, CoachRepository, FinishRunTransactionInput, FinishRunTransactionResult, FriendshipRepository, NotificationRepository, ProfileRepository, RateLimitRepository, ReactionRepository, RunRepository } from "../../domain/repositories.ts";
 import type { Conversation, Friendship, Message, Notification, Profile, ProfileSummary, Run, RunStatistics } from "../../domain/models.ts";
 import type { SupabaseServiceClient } from "./client.ts";
 import { toPublicProfile } from "./mapper.ts";
@@ -122,6 +122,17 @@ export class SupabaseRunRepository implements RunRepository {
     if (error) raise(error, "No se pudieron guardar puntos GPS");
     return rows.length;
   }
+  async finishTransaction(input: FinishRunTransactionInput): Promise<FinishRunTransactionResult> {
+    const { data, error } = await this.db.rpc("finish_run_transaction", {
+      p_user_id: input.userId,
+      p_run: input.run,
+      p_points: input.points,
+      p_activity: input.activity,
+      p_notifications: input.notifications
+    });
+    if (error) raise(error, "No se pudo finalizar la carrera");
+    return data as FinishRunTransactionResult;
+  }
   async getOwnRun(userId: string, runId: string): Promise<Run> {
     const { data, error } = await this.db.from("runs").select("*").eq("id", runId).eq("user_id", userId).single();
     if (error) throw new NotFoundError("Carrera no encontrada");
@@ -188,4 +199,39 @@ export class SupabaseNotificationRepository implements NotificationRepository {
 export class SupabaseCoachRepository implements CoachRepository {
   constructor(private readonly db: SupabaseServiceClient) {}
   async createMessage(input: Record<string, unknown>) { const { data, error } = await this.db.from("coach_messages").insert(input).select("*").single(); if (error) raise(error, "No se pudo guardar mensaje del coach"); return data; }
+}
+
+export class SupabaseRateLimitRepository implements RateLimitRepository {
+  constructor(private readonly db: SupabaseServiceClient) {}
+
+  async increment(userId: string, route: string, windowStart: string): Promise<number> {
+    const existing = await this.db
+      .from("api_rate_limits")
+      .select("id,request_count")
+      .eq("user_id", userId)
+      .eq("route", route)
+      .eq("window_start", windowStart)
+      .maybeSingle();
+    if (existing.error) raise(existing.error, "No se pudo validar limite de uso");
+
+    if (!existing.data) {
+      const created = await this.db
+        .from("api_rate_limits")
+        .insert({ user_id: userId, route, window_start: windowStart, request_count: 1 })
+        .select("request_count")
+        .single();
+      if (created.error) raise(created.error, "No se pudo registrar limite de uso");
+      return Number(created.data.request_count);
+    }
+
+    const nextCount = Number(existing.data.request_count) + 1;
+    const updated = await this.db
+      .from("api_rate_limits")
+      .update({ request_count: nextCount, updated_at: new Date().toISOString() })
+      .eq("id", existing.data.id)
+      .select("request_count")
+      .single();
+    if (updated.error) raise(updated.error, "No se pudo actualizar limite de uso");
+    return Number(updated.data.request_count);
+  }
 }

@@ -1,7 +1,7 @@
 import { ForbiddenError } from "../../domain/errors.ts";
 import type { ActivityRepository, ChatRepository, CoachRepository, FriendshipRepository, NotificationRepository, ProfileRepository, ReactionRepository, RunRepository } from "../../domain/repositories.ts";
 import { NotificationService } from "../services/notification-service.ts";
-import { enumValue, optionalLimit, positiveNumber, requiredString } from "../validation.ts";
+import { enumValue, maxLength, optionalLimit, positiveNumber, requiredString, validateUuid } from "../validation.ts";
 
 const reactionTypes = ["fire", "strong", "clap", "heart", "wow", "trophy"] as const;
 const targetTypes = ["run", "activity"] as const;
@@ -12,7 +12,7 @@ export class SendReactionUseCase {
 
   async execute(userId: string, input: Record<string, unknown>) {
     const targetType = requiredString(input, "target_type");
-    const targetId = requiredString(input, "target_id");
+    const targetId = validateUuid(requiredString(input, "target_id"), "target_id");
     enumValue(targetType, targetTypes, "target_type");
     const reactionType = enumValue(requiredString(input, "reaction_type"), reactionTypes, "reaction_type");
     const ownerId = targetType === "run" ? await this.runs.getRunOwner(targetId) : targetType === "activity" ? await this.activities.getOwner(targetId) : null;
@@ -34,8 +34,8 @@ export class SendMessageUseCase {
   constructor(private readonly chat: ChatRepository, private readonly friendships: FriendshipRepository, private readonly notifications: NotificationService) {}
 
   async execute(userId: string, input: Record<string, unknown>) {
-    const recipientUserId = requiredString(input, "recipient_user_id");
-    const messageBody = requiredString(input, "body");
+    const recipientUserId = validateUuid(requiredString(input, "recipient_user_id"), "recipient_user_id");
+    const messageBody = maxLength(requiredString(input, "body"), "body", 1000);
     await this.friendships.assertAcceptedFriend(userId, recipientUserId);
     const first = userId < recipientUserId ? userId : recipientUserId;
     const second = userId < recipientUserId ? recipientUserId : userId;
@@ -60,6 +60,7 @@ export class ConversationsUseCase {
 export class MessagesUseCase {
   constructor(private readonly chat: ChatRepository) {}
   async execute(userId: string, conversationId: string) {
+    validateUuid(conversationId, "conversation_id");
     const conversation = await this.chat.getConversation(conversationId);
     if (conversation.user_a_id !== userId && conversation.user_b_id !== userId) throw new ForbiddenError("No puedes ver esta conversacion");
     return { conversation, messages: await this.chat.listMessages(conversationId) };
@@ -72,9 +73,9 @@ export class NotifyFriendsUseCase {
     const created = await this.notifications.notifyUsers(
       await this.friendships.getAcceptedFriendIds(userId),
       userId,
-      requiredString(input, "type"),
-      requiredString(input, "title"),
-      requiredString(input, "body"),
+      maxLength(requiredString(input, "type"), "type", 80),
+      maxLength(requiredString(input, "title"), "title", 120),
+      maxLength(requiredString(input, "body"), "body", 500),
       typeof input.related_table === "string" ? input.related_table : undefined,
       typeof input.related_id === "string" ? input.related_id : undefined
     );
@@ -92,14 +93,14 @@ export class NotificationsUseCase {
 export class MarkNotificationReadUseCase {
   constructor(private readonly notifications: NotificationRepository) {}
   async execute(userId: string, input: Record<string, unknown>) {
-    return { notification: await this.notifications.markRead(userId, requiredString(input, "notification_id")) };
+    return { notification: await this.notifications.markRead(userId, validateUuid(requiredString(input, "notification_id"), "notification_id")) };
   }
 }
 
 export class CoachAiUseCase {
   constructor(private readonly coach: CoachRepository) {}
   async execute(userId: string, input: Record<string, unknown>) {
-    const question = requiredString(input, "question");
+    const question = maxLength(requiredString(input, "question"), "question", 1000);
     const inputType = typeof input.input_type === "string" ? enumValue(input.input_type, coachInputTypes, "input_type") : "text";
     const caloriesGoal = input.calories_goal === undefined || input.calories_goal === null ? null : positiveNumber(input, "calories_goal");
     const answer = caloriesGoal

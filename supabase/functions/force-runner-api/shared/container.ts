@@ -4,7 +4,8 @@ import { GetMeUseCase, UpdateMeUseCase } from "../application/use-cases/profile-
 import { CancelRunUseCase, FinishRunUseCase, RunDetailUseCase, RunHistoryUseCase, StartRunUseCase, StatisticsUseCase } from "../application/use-cases/run-use-cases.ts";
 import { CoachAiUseCase, ConversationsUseCase, GetReactionsUseCase, MarkNotificationReadUseCase, MessagesUseCase, NotificationsUseCase, NotifyFriendsUseCase, SendMessageUseCase, SendReactionUseCase } from "../application/use-cases/social-use-cases.ts";
 import { createSupabaseServiceClient } from "../infrastructure/supabase/client.ts";
-import { SupabaseActivityRepository, SupabaseChatRepository, SupabaseCoachRepository, SupabaseFriendshipRepository, SupabaseNotificationRepository, SupabaseProfileRepository, SupabaseReactionRepository, SupabaseRunRepository } from "../infrastructure/supabase/repositories.ts";
+import { SupabaseActivityRepository, SupabaseChatRepository, SupabaseCoachRepository, SupabaseFriendshipRepository, SupabaseNotificationRepository, SupabaseProfileRepository, SupabaseRateLimitRepository, SupabaseReactionRepository, SupabaseRunRepository } from "../infrastructure/supabase/repositories.ts";
+import type { RateLimitRepository } from "../domain/repositories.ts";
 
 export interface AppContainer {
   startRun: StartRunUseCase;
@@ -30,6 +31,7 @@ export interface AppContainer {
   getMe: GetMeUseCase;
   updateMe: UpdateMeUseCase;
   coachAi: CoachAiUseCase;
+  rateLimits: RateLimitRepository;
 }
 
 export function createContainer(): AppContainer {
@@ -42,6 +44,7 @@ export function createContainer(): AppContainer {
   const chat = new SupabaseChatRepository(db);
   const notifications = new SupabaseNotificationRepository(db);
   const coach = new SupabaseCoachRepository(db);
+  const rateLimits = new SupabaseRateLimitRepository(db);
   const notificationService = new NotificationService(notifications, profiles);
 
   return {
@@ -67,6 +70,7 @@ export function createContainer(): AppContainer {
     markNotificationRead: new MarkNotificationReadUseCase(notifications),
     getMe: new GetMeUseCase(profiles),
     updateMe: new UpdateMeUseCase(profiles),
-    coachAi: new CoachAiUseCase(coach)
+    coachAi: new CoachAiUseCase(coach),
+    rateLimits
   };
 }

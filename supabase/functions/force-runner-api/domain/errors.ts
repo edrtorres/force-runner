@@ -28,3 +28,9 @@ export class ValidationError extends AppError {
     super(message, 400);
   }
 }
+
+export class TooManyRequestsError extends AppError {
+  constructor(message = "Demasiadas solicitudes. Intenta de nuevo mas tarde") {
+    super(message, 429);
+  }
+}

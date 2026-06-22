@@ -1,6 +1,6 @@
 import type { ActivityRepository, FriendshipRepository, ProfileRepository, RunRepository } from "../../domain/repositories.ts";
 import { NotificationService } from "../services/notification-service.ts";
-import { optionalCoordinate, optionalLimit, positiveNumber } from "../validation.ts";
+import { optionalCoordinate, optionalLimit, positiveNumber, validateRunPoints, validateUuid } from "../validation.ts";
 
 export class StartRunUseCase {
   constructor(private readonly profiles: ProfileRepository, private readonly friendships: FriendshipRepository, private readonly activities: ActivityRepository, private readonly notifications: NotificationService) {}
@@ -39,19 +39,28 @@ export class FinishRunUseCase {
   async execute(userId: string, input: Record<string, unknown>) {
     positiveNumber(input, "duration_seconds");
     positiveNumber(input, "distance_meters");
-    const run = await this.runs.create(userId, input);
-    const pointsCreated = await this.runs.addPoints(run.id, input, run.ended_at ?? new Date().toISOString());
     const profile = await this.profiles.getById(userId);
-    const activity = await this.activities.create({
-      user_id: userId,
-      run_id: run.id,
+    const friendIds = await this.friendships.getAcceptedFriendIds(userId);
+    const distanceMeters = Number(input.distance_meters);
+    const activityTitle = `${profile.display_name} completo ${(distanceMeters / 1000).toFixed(2)} km`;
+    return await this.runs.finishTransaction({
+      userId,
+      run: input,
+      points: validateRunPoints(input),
+      activity: {
       type: "finished_run",
-      title: `${profile.display_name} completo ${(Number(run.distance_meters) / 1000).toFixed(2)} km`,
+        title: activityTitle,
       body: "Reacciona a su carrera",
-      metadata: { distance_meters: run.distance_meters, calories: run.calories }
+        metadata: { distance_meters: distanceMeters, calories: input.calories ?? 0 }
+      },
+      notifications: friendIds.map((recipientUserId) => ({
+        recipient_user_id: recipientUserId,
+        type: "friend_finished_run",
+        title: activityTitle,
+        body: "Reacciona a su carrera",
+        related_table: "runs"
+      }))
     });
-    const created = await this.notifications.notifyUsers(await this.friendships.getAcceptedFriendIds(userId), userId, "friend_finished_run", String(activity.title), String(activity.body), "runs", run.id);
-    return { run, activity, points_created: pointsCreated, notifications_created: created.length };
   }
 }
 
@@ -65,6 +74,7 @@ export class RunHistoryUseCase {
 export class RunDetailUseCase {
   constructor(private readonly runs: RunRepository) {}
   async execute(userId: string, runId: string) {
+    validateUuid(runId, "run_id");
     const run = await this.runs.getOwnRun(userId, runId);
     return { run, points: await this.runs.listPoints(run.id) };
   }

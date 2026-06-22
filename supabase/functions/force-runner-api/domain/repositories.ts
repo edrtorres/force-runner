@@ -21,6 +21,7 @@ export interface FriendshipRepository {
 export interface RunRepository {
   create(userId: string, input: Record<string, unknown>): Promise<Run>;
   addPoints(runId: string, input: Record<string, unknown>, endedAt: string): Promise<number>;
+  finishTransaction(input: FinishRunTransactionInput): Promise<FinishRunTransactionResult>;
   getOwnRun(userId: string, runId: string): Promise<Run>;
   getRunOwner(runId: string): Promise<string>;
   listHistory(userId: string, limit: number): Promise<Run[]>;
@@ -57,4 +58,23 @@ export interface NotificationRepository {
 
 export interface CoachRepository {
   createMessage(input: Record<string, unknown>): Promise<Record<string, unknown>>;
+}
+
+export interface RateLimitRepository {
+  increment(userId: string, route: string, windowStart: string): Promise<number>;
+}
+
+export interface FinishRunTransactionInput {
+  userId: string;
+  run: Record<string, unknown>;
+  points: Record<string, unknown>[];
+  activity: Record<string, unknown>;
+  notifications: Record<string, unknown>[];
+}
+
+export interface FinishRunTransactionResult {
+  run: Run;
+  activity: Record<string, unknown>;
+  points_created: number;
+  notifications_created: number;
 }

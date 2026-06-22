@@ -1,5 +1,5 @@
 import { assertEquals, assertThrows } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { enumValue, optionalCoordinate, optionalLimit, positiveNumber, requiredNumber, requiredString } from "../application/validation.ts";
+import { enumValue, maxLength, optionalCoordinate, optionalLimit, positiveNumber, requiredNumber, requiredString, validateUuid } from "../application/validation.ts";
 import { ValidationError } from "../domain/errors.ts";
 
 Deno.test("requiredString returns trimmed values", () => {
@@ -35,4 +35,14 @@ Deno.test("optionalCoordinate validates latitude and longitude ranges", () => {
 Deno.test("enumValue rejects values outside the allowed list", () => {
   assertEquals(enumValue("fire", ["fire", "heart"] as const, "reaction_type"), "fire");
   assertThrows(() => enumValue("angry", ["fire", "heart"] as const, "reaction_type"), ValidationError);
+});
+
+Deno.test("validateUuid rejects invalid identifiers", () => {
+  assertEquals(validateUuid("bbbbbbbb-0001-4000-8000-000000000001", "run_id"), "bbbbbbbb-0001-4000-8000-000000000001");
+  assertThrows(() => validateUuid("run-1", "run_id"), ValidationError);
+});
+
+Deno.test("maxLength rejects oversized text", () => {
+  assertEquals(maxLength("hola", "body", 10), "hola");
+  assertThrows(() => maxLength("123456", "body", 5), ValidationError);
 });

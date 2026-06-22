@@ -3,7 +3,7 @@ import { FunctionController } from "./controllers.ts";
 import { Router } from "./router.ts";
 
 export function createApp(container: AppContainer) {
-  const router = new Router();
+  const router = new Router(container.rateLimits);
 
   router.register("POST", "/start-run", new FunctionController(({ userId, body }) => container.startRun.execute(userId, body)));
   router.register("POST", "/finish-run", new FunctionController(({ userId, body }) => container.finishRun.execute(userId, body)));

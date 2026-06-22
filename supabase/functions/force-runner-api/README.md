@@ -63,6 +63,13 @@ deno test supabase/functions/force-runner-api/tests
 
 ## Limites pendientes
 
-- Agregar transacciones RPC para operaciones compuestas como `finish-run`.
-- Agregar rate limiting si la app se expone publicamente.
-- Crear CI para ejecutar pruebas automaticamente en GitHub.
+- Mantener actualizadas las pruebas cuando cambien contratos de API.
+- Agregar integraciones externas solo si se aprueban como cambios funcionales: FCM real y proveedor IA real.
+
+## Controles tecnicos activos
+
+- `finish-run` usa una funcion RPC transaccional para guardar carrera, puntos, actividad y notificaciones.
+- Endpoints sensibles tienen rate limiting por usuario y ventana de un minuto.
+- Las rutas `/v1/...` funcionan como alias compatibles de las rutas actuales.
+- Las entradas principales validan UUID, rangos numericos, coordenadas, enums y tamanos maximos.
+- El router registra logs estructurados con `request_id`, ruta, estado y duracion.

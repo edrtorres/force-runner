@@ -8,8 +8,8 @@ const profiles: ProfileRepository = {
   getMe: () => Promise.reject(new Error("not used")),
   updateMe: () => Promise.reject(new Error("not used")),
   searchPublic: () => Promise.resolve([
-    { id: "user-2", display_name: "Astrid", country: "Honduras", avatar_url: null },
-    { id: "user-3", display_name: "Josue", country: "Honduras", avatar_url: null }
+    { id: "11111111-1111-4111-8111-111111111111", display_name: "Astrid", country: "Honduras", avatar_url: null },
+    { id: "33333333-3333-4333-8333-333333333333", display_name: "Josue", country: "Honduras", avatar_url: null }
   ])
 };
 
@@ -21,14 +21,14 @@ const friendships: FriendshipRepository = {
   respond: () => Promise.reject(new Error("not used")),
   listPending: () => Promise.reject(new Error("not used")),
   listFriendshipStatuses: () => Promise.resolve([
-    { id: "friendship-1", requester_id: "user-1", addressee_id: "user-2", status: "pending", requested_at: "", responded_at: null },
-    { id: "friendship-2", requester_id: "user-3", addressee_id: "user-1", status: "accepted", requested_at: "", responded_at: null }
+    { id: "aaaaaaaa-0001-4000-8000-000000000001", requester_id: "22222222-2222-4222-8222-222222222222", addressee_id: "11111111-1111-4111-8111-111111111111", status: "pending", requested_at: "", responded_at: null },
+    { id: "aaaaaaaa-0002-4000-8000-000000000002", requester_id: "33333333-3333-4333-8333-333333333333", addressee_id: "22222222-2222-4222-8222-222222222222", status: "accepted", requested_at: "", responded_at: null }
   ])
 };
 
 Deno.test("SearchUsersUseCase adds friendship status without exposing private data", async () => {
   const useCase = new SearchUsersUseCase(profiles, friendships);
-  const result = await useCase.execute("user-1", "as");
+  const result = await useCase.execute("22222222-2222-4222-8222-222222222222", "as");
 
   assertEquals(result.users[0].friendship_status, "pending_sent");
   assertEquals(result.users[1].friendship_status, "accepted");
@@ -38,7 +38,7 @@ Deno.test("SearchUsersUseCase adds friendship status without exposing private da
 
 Deno.test("SearchUsersUseCase ignores short queries", async () => {
   const useCase = new SearchUsersUseCase(profiles, friendships);
-  const result = await useCase.execute("user-1", "a");
+  const result = await useCase.execute("22222222-2222-4222-8222-222222222222", "a");
 
   assertEquals(result.users.length, 0);
 });

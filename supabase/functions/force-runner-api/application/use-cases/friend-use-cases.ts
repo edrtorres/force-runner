@@ -1,7 +1,7 @@
 import { ValidationError } from "../../domain/errors.ts";
 import type { FriendshipRepository, ProfileRepository, RunRepository } from "../../domain/repositories.ts";
 import { NotificationService } from "../services/notification-service.ts";
-import { requiredString } from "../validation.ts";
+import { requiredString, validateUuid } from "../validation.ts";
 
 export class SearchUsersUseCase {
   constructor(private readonly profiles: ProfileRepository, private readonly friendships: FriendshipRepository) {}
@@ -47,7 +47,7 @@ export class CreateFriendRequestUseCase {
   constructor(private readonly friendships: FriendshipRepository, private readonly notifications: NotificationService) {}
 
   async execute(userId: string, input: Record<string, unknown>) {
-    const addresseeId = requiredString(input, "addressee_id");
+    const addresseeId = validateUuid(requiredString(input, "addressee_id"), "addressee_id");
     if (addresseeId === userId) throw new ValidationError("No puedes enviarte solicitud a ti mismo");
     const existing = await this.friendships.findBetween(userId, addresseeId);
     if (existing) return { friendship: existing };
@@ -61,7 +61,7 @@ export class RespondFriendRequestUseCase {
   constructor(private readonly friendships: FriendshipRepository, private readonly notifications: NotificationService) {}
 
   async execute(userId: string, input: Record<string, unknown>) {
-    const friendshipId = requiredString(input, "friendship_id");
+    const friendshipId = validateUuid(requiredString(input, "friendship_id"), "friendship_id");
     const status = requiredString(input, "status");
     if (status !== "accepted" && status !== "rejected") throw new ValidationError("status debe ser accepted o rejected");
     const friendship = await this.friendships.respond(friendshipId, userId, status);

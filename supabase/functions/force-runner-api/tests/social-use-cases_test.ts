@@ -11,8 +11,9 @@ Deno.test("SendReactionUseCase rejects unsupported reaction types", async () => 
   const runs: RunRepository = {
     create: () => Promise.reject(new Error("not used")),
     addPoints: () => Promise.resolve(0),
+    finishTransaction: () => Promise.reject(new Error("not used")),
     getOwnRun: () => Promise.reject(new Error("not used")),
-    getRunOwner: () => Promise.resolve("user-1"),
+    getRunOwner: () => Promise.resolve("22222222-2222-4222-8222-222222222222"),
     listHistory: () => Promise.resolve([]),
     listPoints: () => Promise.resolve([]),
     getStatistics: () => Promise.resolve(null),
@@ -33,7 +34,7 @@ Deno.test("SendReactionUseCase rejects unsupported reaction types", async () => 
   };
   const useCase = new SendReactionUseCase(reactions, runs, activities, friendships);
 
-  await assertRejects(() => useCase.execute("user-1", { target_type: "run", target_id: "run-1", reaction_type: "angry" }), ValidationError);
+  await assertRejects(() => useCase.execute("22222222-2222-4222-8222-222222222222", { target_type: "run", target_id: "bbbbbbbb-0001-4000-8000-000000000001", reaction_type: "angry" }), ValidationError);
 });
 
 Deno.test("CoachAiUseCase validates positive calorie goals", async () => {
@@ -42,8 +43,8 @@ Deno.test("CoachAiUseCase validates positive calorie goals", async () => {
   };
   const useCase = new CoachAiUseCase(coach);
 
-  await assertRejects(() => useCase.execute("user-1", { question: "Cuanto debo correr?", calories_goal: 0 }), ValidationError);
+  await assertRejects(() => useCase.execute("22222222-2222-4222-8222-222222222222", { question: "Cuanto debo correr?", calories_goal: 0 }), ValidationError);
 
-  const result = await useCase.execute("user-1", { question: "Cuanto debo correr?", calories_goal: 300, input_type: "text" });
+  const result = await useCase.execute("22222222-2222-4222-8222-222222222222", { question: "Cuanto debo correr?", calories_goal: 300, input_type: "text" });
   assertEquals((result.coach_message as Record<string, unknown>).calories_goal, 300);
 });
