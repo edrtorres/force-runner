@@ -1,6 +1,10 @@
 package com.forcerunner.data.remote;
 
-import java.util.Map;
+import com.forcerunner.data.remote.model.auth.AuthSessionDto;
+import com.forcerunner.data.remote.model.auth.AuthUserDto;
+import com.forcerunner.data.remote.model.auth.LoginRequest;
+import com.forcerunner.data.remote.model.auth.RecoverPasswordRequest;
+import com.forcerunner.data.remote.model.auth.SignupRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -9,17 +13,17 @@ import retrofit2.http.Query;
 
 public interface AuthApi {
     @POST("auth/v1/token")
-    Call<Map<String, Object>> login(
+    Call<AuthSessionDto> login(
             @Query("grant_type") String grantType,
-            @Body Map<String, Object> body
+            @Body LoginRequest body
     );
 
     @POST("auth/v1/signup")
-    Call<Map<String, Object>> signup(@Body Map<String, Object> body);
+    Call<AuthUserDto> signup(@Body SignupRequest body);
 
     @POST("auth/v1/recover")
-    Call<Map<String, Object>> recover(@Body Map<String, Object> body);
+    Call<Void> recover(@Body RecoverPasswordRequest body);
 
     @POST("auth/v1/logout")
-    Call<Map<String, Object>> logout();
+    Call<Void> logout();
 }
