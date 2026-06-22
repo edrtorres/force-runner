@@ -48,7 +48,7 @@ export class Router {
   }
 
   private normalizePath(pathname: string): string {
-    return (pathname.replace(/^\/force-runner-api/, "").replace(/^\/v1/, "") || "/");
+    return (pathname.replace(/^\/force-runner-api-v2/, "").replace(/^\/force-runner-api/, "").replace(/^\/v1/, "") || "/");
   }
 
   private async enforceRateLimit(userId: string, routeKey: string): Promise<void> {

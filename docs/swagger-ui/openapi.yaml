@@ -8,7 +8,7 @@ info:
   contact:
     name: Equipo Force Runner
 servers:
-  - url: https://mmhmtcotlirxhspeqhfh.supabase.co/functions/v1/force-runner-api
+  - url: https://mmhmtcotlirxhspeqhfh.supabase.co/functions/v1/force-runner-api-v2
     description: Supabase Edge Function - Force Runner API
 tags:
   - name: Auth
