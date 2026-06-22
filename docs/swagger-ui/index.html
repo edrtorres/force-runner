@@ -43,26 +43,16 @@
           return `${baseUrl}${path}${query}`;
         }
 
-        document.addEventListener(
-          "click",
-          async function (event) {
-            const clickedElement = event.target;
-            const copyButton = clickedElement.closest?.(".copy-to-clipboard");
-            if (!copyButton) return;
+        const originalWriteText = navigator.clipboard.writeText.bind(navigator.clipboard);
+        navigator.clipboard.writeText = function (text) {
+          const trimmedText = String(text).trim();
 
-            const operation = copyButton.closest(".opblock");
-            const pathElement = operation?.querySelector(".opblock-summary-path");
-            const path = pathElement?.getAttribute("data-path") || pathElement?.textContent?.trim();
-            if (!path || !path.startsWith("/")) return;
+          if (trimmedText.startsWith("/") && !trimmedText.startsWith("//")) {
+            return originalWriteText(buildFullUrl(trimmedText));
+          }
 
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-
-            await navigator.clipboard.writeText(buildFullUrl(path));
-          },
-          true,
-        );
+          return originalWriteText(trimmedText);
+        };
       };
     </script>
   </body>
